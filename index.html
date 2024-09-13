@@ -44,6 +44,8 @@
 
         peer.on('open', id => {
             console.log('My peer ID is: ' + id);
+            // عرض Peer ID في واجهة المستخدم إذا رغبت في ذلك
+            peerIdInput.placeholder = `Your Peer ID: ${id}`;
         });
 
         navigator.mediaDevices.getUserMedia({ video: true, audio: true })
