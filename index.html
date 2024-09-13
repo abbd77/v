@@ -33,42 +33,71 @@
     </style>
 </head>
 <body>
-    <h1>Open Camera and Read Domino Pieces</h1>
+    <h1>Open Camera and Analyze Dominoes</h1>
     <video id="video" autoplay></video>
     <canvas id="canvas"></canvas>
     <button id="captureButton">Capture and Analyze</button>
 
+    <script async src="https://docs.opencv.org/4.x/opencv.js"></script>
     <script>
-        // Access the camera
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
         const captureButton = document.getElementById('captureButton');
         const context = canvas.getContext('2d');
 
-        // Request access to the camera
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then(stream => {
-                video.srcObject = stream;
-            })
-            .catch(error => {
-                console.error("Error accessing the camera: ", error);
-            });
+        async function startCamera() {
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videoDevices = devices.filter(device => device.kind === 'videoinput');
 
-        // Capture and display the video frame on a canvas
+                let backCameraId = videoDevices.find(device => device.label.toLowerCase().includes('back'))?.deviceId;
+                if (!backCameraId) {
+                    backCameraId = videoDevices[0]?.deviceId;
+                }
+
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { deviceId: backCameraId } });
+                video.srcObject = stream;
+            } catch (error) {
+                console.error("Error accessing the camera: ", error);
+            }
+        }
+
         captureButton.addEventListener('click', () => {
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-            // Analyze the image (you'll add the image analysis part here)
             analyzeDominoPieces(canvas);
         });
 
         function analyzeDominoPieces(canvas) {
-            // Placeholder function for analyzing the domino pieces
-            // Here is where you would implement OpenCV.js or any other image processing library
-            console.log("Image captured. Now you can analyze the domino pieces.");
+            cv.onRuntimeInitialized = () => {
+                let src = cv.imread(canvas);
+                let gray = new cv.Mat();
+                let edges = new cv.Mat();
+                let contours = new cv.MatVector();
+                let hierarchy = new cv.Mat();
+
+                cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
+                cv.Canny(gray, edges, 50, 100);
+                cv.findContours(edges, contours, hierarchy, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE);
+
+                console.log(`Number of contours: ${contours.size()}`);
+                
+                // Add further processing to identify domino pieces
+                // Example: Draw contours on canvas
+                cv.drawContours(src, contours, -1, [0, 255, 0, 255], 1);
+                cv.imshow('canvas', src);
+
+                // Clean up
+                src.delete();
+                gray.delete();
+                edges.delete();
+                contours.delete();
+                hierarchy.delete();
+            };
         }
+
+        startCamera();
     </script>
 </body>
 </html>
