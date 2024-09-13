@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Domino Camera</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        video {
+            width: 100%;
+            height: auto;
+            max-width: 400px;
+            border: 2px solid black;
+        }
+        canvas {
+            display: none;
+        }
+        #captureButton {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Open Camera and Read Domino Pieces</h1>
+    <video id="video" autoplay></video>
+    <canvas id="canvas"></canvas>
+    <button id="captureButton">Capture and Analyze</button>
+
+    <script>
+        // Access the camera
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const captureButton = document.getElementById('captureButton');
+        const context = canvas.getContext('2d');
+
+        // Request access to the camera
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(error => {
+                console.error("Error accessing the camera: ", error);
+            });
+
+        // Capture and display the video frame on a canvas
+        captureButton.addEventListener('click', () => {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Analyze the image (you'll add the image analysis part here)
+            analyzeDominoPieces(canvas);
+        });
+
+        function analyzeDominoPieces(canvas) {
+            // Placeholder function for analyzing the domino pieces
+            // Here is where you would implement OpenCV.js or any other image processing library
+            console.log("Image captured. Now you can analyze the domino pieces.");
+        }
+    </script>
+</body>
+</html>
