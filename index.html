@@ -28,7 +28,7 @@
     <h1>WebRTC Video Chat</h1>
     <video id="localVideo" autoplay muted></video>
     <video id="remoteVideo" autoplay></video>
-    <input id="peerIdInput" type="text" placeholder="Enter peer ID" />
+    <input id="peerIdInput" type="text" placeholder="Enter 4-digit code" maxlength="4" />
     <button id="callButton">Call</button>
     <button id="answerButton">Answer</button>
 
@@ -40,12 +40,17 @@
         const callButton = document.getElementById('callButton');
         const answerButton = document.getElementById('answerButton');
 
-        const peer = new Peer();
+        // إنشاء Peer مع معرف ثابت لتجربة مكونة من 4 أرقام
+        const peer = new Peer({
+            key: 'peerjs', // استخدم مفتاحك الخاص إذا كان لديك واحدًا
+            debug: 3
+        });
+
+        let myPeerId = ''; // لتخزين Peer ID الثابت
 
         peer.on('open', id => {
-            console.log('My peer ID is: ' + id);
-            // عرض Peer ID في واجهة المستخدم إذا رغبت في ذلك
-            peerIdInput.placeholder = `Your Peer ID: ${id}`;
+            myPeerId = id.slice(-4); // الحصول على آخر 4 أرقام من Peer ID لتحديده
+            peerIdInput.placeholder = `Your 4-digit code: ${myPeerId}`;
         });
 
         navigator.mediaDevices.getUserMedia({ video: true, audio: true })
@@ -61,18 +66,26 @@
 
                 callButton.addEventListener('click', () => {
                     const peerId = peerIdInput.value;
-                    const call = peer.call(peerId, stream);
-                    call.on('stream', remoteStream => {
-                        remoteVideo.srcObject = remoteStream;
-                    });
+                    if (peerId.length === 4) {
+                        const call = peer.call(peerId, stream);
+                        call.on('stream', remoteStream => {
+                            remoteVideo.srcObject = remoteStream;
+                        });
+                    } else {
+                        alert('Please enter a 4-digit code.');
+                    }
                 });
 
                 answerButton.addEventListener('click', () => {
                     const peerId = peerIdInput.value;
-                    const call = peer.call(peerId, stream);
-                    call.on('stream', remoteStream => {
-                        remoteVideo.srcObject = remoteStream;
-                    });
+                    if (peerId.length === 4) {
+                        const call = peer.call(peerId, stream);
+                        call.on('stream', remoteStream => {
+                            remoteVideo.srcObject = remoteStream;
+                        });
+                    } else {
+                        alert('Please enter a 4-digit code.');
+                    }
                 });
             })
             .catch(error => {
